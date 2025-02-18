@@ -11,6 +11,16 @@ import { IMAGE_LINK } from '../../utils/constants'
 import CheckboxBtn from '../../ui/FdCheckbox/CheckboxBtn'
 import { useTranslation } from 'react-i18next'
 
+const NoRepeatTap = (func, wait) => {
+  let timeout;
+  return function (...args) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {func(...args)}, wait);
+  };
+};
+
 const ReorderItem = props => {
   const { t, i18n } = useTranslation()
 
@@ -22,12 +32,16 @@ const ReorderItem = props => {
     props?.itemImage && props?.itemImage.trim() !== ''
       ? props?.itemImage
       : IMAGE_LINK
+  const press = useCallback(NoRepeatTap(() => {
+    if (props.onPress)
+      props.onPress();
+    }, 300), [props.onPress]);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen)
   }
 
   return (
-    <TouchableOpacity style={styles(currentTheme).itemContainer} onPress={props.onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles(currentTheme).itemContainer} onPress={handlePress} activeOpacity={0.7}>
       <View
         style={{
           flexDirection: currentTheme?.isRTL ? 'row-reverse' : 'row',
@@ -113,7 +127,7 @@ const ReorderItem = props => {
       </View>
       <CheckboxBtn
         checked={props.checked}
-        onPress={props.onPress}
+        onPress={handlePress}
       />
     </TouchableOpacity>
   )
